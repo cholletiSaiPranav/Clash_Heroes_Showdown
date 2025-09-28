@@ -9,24 +9,24 @@ const server = http.createServer(app);
 // Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: '*', // allow all origins for testing; restrict in production
+    origin: '*', // allow all origins; restrict in production
     methods: ['GET', 'POST']
   }
 });
 
-// Serve static files (your frontend build)
+// Serve static files
 app.use(express.static(path.join(__dirname, '.')));
 
-// Catch-all route to serve index.html for SPA routing
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+// Catch-all route (SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'index.html'));
 });
 
-// Game rooms storage
+// Game rooms
 let rooms = {};
 
 io.on('connection', (socket) => {
-  console.log('New socket connected:', socket.id);
+  console.log('Socket connected:', socket.id);
 
   socket.on('createRoom', (callback) => {
     const roomId = Math.random().toString(36).substring(7);
@@ -81,6 +81,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Use Render's PORT environment variable
+// Use Render PORT
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
