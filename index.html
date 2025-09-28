@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +22,6 @@
     .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
     .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .grid.cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}
     .card{background:linear-gradient(180deg, rgba(203, 14, 14, 0.05), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.1);backdrop-filter: blur(4px);border-radius:16px;padding:16px;box-shadow:0 14px 40px rgba(0,0,0,.28)}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .spacer{height:10px}
@@ -35,7 +41,7 @@
     .char-name{font-weight:800}
     .char-desc{color:#c7d2ff;font-size:13px}
     .char-card.selected{outline:3px solid var(--accent)}
-    .six-pane{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;align-items:start}
+    .two-pane{display:grid;grid-template-columns:1fr 220px 1fr;gap:16px;align-items:start}
     .divider{display:flex;align-items:center;justify-content:center}
     .play-pod{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px}
     .stage-wrap{display:none}
@@ -65,7 +71,8 @@
 
     <!-- HOME -->
     <section id="screen-home" class="menu active">
-      <p class="subtitle">A Multiplayer-Game created by : <span class="hl">CHSP</span>.<br> Supports up to 6 players online!<br>Flow: Try Game → Main Menu → Start Game → Modes → VS Mode → Character Select → Play<br>(!STILL UNDER DEVELOPMENT!)<br>contact me: <span class="hl">cholletisaipranav@gmail.com</span></p>
+           <p class="subtitle">A Multiplayer-Game created by : <span class="hl">CHSP</span>.<br> Currently this game can be played in single PC <br>Flow: <strong>Try Game → Main Menu → Start Game → Modes → VS Mode → Character Select → Play      
+        <br>    (!STILL UNDER DEVELOPMENT!)<br></strong>contact me: <span class="hl">cholletisaipranav@gmail.com</span></p>
       <div class="grid cols-2">
         <div class="card">
           <div class="title">Home</div>
@@ -81,8 +88,8 @@
           <ul class="subtitle">
             <li>You can change your key settings from Key Settings.</li>
             <li>Don't try to find bugs, as it may affect your user experience.</li>
-            <li>Currently a game of 6 characters, up to 6 players.</li>
-            <li><strong>ENJOY CLASHING</strong></li>
+            <li>Currently a game of 6 characters.</li>
+            <li><strong>ENJOY CLASHING</li>
           </ul>
         </div>
       </div>
@@ -110,7 +117,7 @@
 
     <!-- NETWORK -->
     <section id="screen-network" class="menu">
-      <div class="title">Network Game (Up to 6 Players)</div>
+      <div class="title">Network Game</div>
       <div class="grid cols-2">
         <div class="card">
           <div class="title">Create Room</div>
@@ -131,24 +138,41 @@
         <div class="card">
           <div class="title">Select Mode</div>
           <div class="grid cols-2">
-            <button class="btn primary" data-nav="vs-select">⚔ VS Mode (Multiplayer)</button>
+            <button class="btn primary" data-nav="vs-select">⚔ VS Mode</button>
             <button class="btn" disabled>🌪 Survival (todo)</button>
           </div>
         </div>
         <div class="card">
           <div class="title">About VS</div>
-          <p>Pick characters and duel with up to 6 players on floating platforms.</p>
+          <p>Pick characters for both sides and duel on floating platforms.</p>
         </div>
       </div>
     </section>
 
     <!-- VS SELECT -->
     <section id="screen-vs-select" class="menu">
-      <div class="title">VS Mode — Character Select (Up to 6 Players)</div>
-      <div class="six-pane" id="playerPanes"></div>
-      <div class="play-pod" style="text-align:center; margin-top:20px;">
-        <button class="btn primary" id="playBtn" disabled>▶ Start Game</button>
-        <button class="btn" data-nav="modes">⟵ Back to Modes</button>
+      <div class="title">VS Mode — Character Select</div>
+      <div class="two-pane">
+        <div class="card" id="p1Pane">
+          <div class="row" style="justify-content:space-between">
+            <div class="subtitle">Player 1</div>
+            <span class="pill" id="p1ChoiceLabel">None</span>
+          </div>
+          <div class="grid cols-2" id="p1CharGrid"></div>
+        </div>
+        <div class="divider">
+          <div class="play-pod">
+            <button class="btn primary" id="playBtn" disabled>▶ Play</button>
+            <button class="btn" data-nav="modes">⟵ Back to Modes</button>
+          </div>
+        </div>
+        <div class="card" id="p2Pane">
+          <div class="row" style="justify-content:space-between">
+            <div class="subtitle">Player 2</div>
+            <span class="pill" id="p2ChoiceLabel">None</span>
+          </div>
+          <div class="grid cols-2" id="p2CharGrid"></div>
+        </div>
       </div>
     </section>
 
@@ -162,17 +186,27 @@
     <section id="screen-keys" class="menu">
       <div class="grid cols-2">
         <div class="card">
-          <div class="title">Key Settings (For Your Local Controls)</div>
+          <div class="title">Key Settings</div>
           <form id="keysForm" class="grid cols-2">
             <div>
-              <h4>Your Controls</h4>
-              <label>Left <input name="left" value="a" maxlength="1"></label>
-              <label>Right <input name="right" value="d" maxlength="1"></label>
-              <label>Jump <input name="jump" value="w" maxlength="1"></label>
-              <label>Down <input name="down" value="x" maxlength="1"></label>
-              <label>Attack <input name="attack" value="s" maxlength="1"></label>
-              <label>Defence <input name="defence" value="f" maxlength="1"></label>
-              <label>Special <input name="special" value="g" maxlength="1"></label>
+              <h4>Player 1</h4>
+              <label>Left <input name="p1_left" value="a" maxlength="1"></label>
+              <label>Right <input name="p1_right" value="d" maxlength="1"></label>
+              <label>Jump <input name="p1_jump" value="w" maxlength="1"></label>
+              <label>Down <input name="p1_down" value="x" maxlength="1"></label>
+              <label>Attack <input name="p1_attack" value="s" maxlength="1"></label>
+              <label>Defence <input name="p1_defence" value="f" maxlength="1"></label>
+              <label>Special <input name="p1_special" value="g" maxlength="1"></label>
+            </div>
+            <div>
+              <h4>Player 2</h4>
+              <label>Left <input name="p2_left" value="4" maxlength="1"></label>
+              <label>Right <input name="p2_right" value="6" maxlength="1"></label>
+              <label>Jump <input name="p2_jump" value="8" maxlength="1"></label>
+              <label>Down <input name="p2_down" value="2" maxlength="1"></label>
+              <label>Attack <input name="p2_attack" value="5" maxlength="1"></label>
+              <label>Defence <input name="p2_defence" value="+" maxlength="1"></label>
+              <label>Special <input name="p2_special" value="." maxlength="1"></label>
             </div>
             <div class="spacer"></div>
             <div class="row">
@@ -183,7 +217,7 @@
         </div>
         <div class="card">
           <div class="title">Notes</div>
-          <p>Single key per move (case-insensitive). Keys are saved locally. In multiplayer, each player uses their own controls.</p>
+          <p>Single key per move (case-insensitive). Numpad works with NumLock. Keys are saved locally.</p>
         </div>
       </div>
     </section>
@@ -192,27 +226,58 @@
     <section id="screen-guide" class="menu">
       <div class="title">Guide</div>
       <div class="card">
-        <ul>
-          <li><strong style="color:#e67e22;">Swordsman</strong> 🗡️ (HP: 120, Color: <span style="color:#e67e22;">#e67e22</span>)<br>Basic Attack: A powerful melee slash that deals <strong>25 damage</strong>.<br>Special Ability: Temporarily gains <strong>2× movement speed</strong> for <strong>3 seconds</strong>.</li>
-          <li><strong style="color:#2ecc71;">Archer</strong> 🏹 (HP: 100, Color: <span style="color:#2ecc71;">#2ecc71</span>)<br>Basic Attack: Fires arrows dealing <strong>10 damage</strong> per shot.<br>Special Ability: Fires a <strong>fast arrow</strong> that deals <strong>20 damage</strong>.</li>
-          <li><strong style="color:#3498db;">Icezzy</strong> ❄️ (HP: 105, Color: <span style="color:#3498db;">#3498db</span>)<br>Basic Attack: Shoots an ice bolt that deals <strong>10 damage</strong>.<br>Special Ability: Freeze attack that does <strong>10 damage</strong> and <strong>slows enemy for 10 seconds</strong>.</li>
-          <li><strong style="color:#2ecc40;">Poisonerer</strong> ☠️ (HP: 95, Color: <span style="color:#2ecc40;">#2ecc40</span>)<br>Basic Attack: Shoots a dart that deals <strong>10 immediate damage</strong>.<br>Special Ability: Deals <strong>10 direct + 10 over 15 seconds</strong>.</li>
-          <li><strong style="color:#9b59b6;">Healer</strong> ✨ (HP: 100, Color: <span style="color:#9b59b6;">#9b59b6</span>)<br>Basic Attack: Fires a bolt dealing <strong>10 damage</strong>.<br>Special Ability: Heals for <strong>40 HP over 20 seconds</strong> (90s cooldown).</li>
-          <li><strong style="color:#1abc9c;">NightGhost</strong> 🌙 (HP: 80, Color: <span style="color:#1abc9c;">#1abc9c</span>)<br>Basic Attack: Fires bullets that deal <strong>10 damage</strong> (6 ammo, 8 in Domain).<br>Passive: Phase (intangible) at night for 30 seconds (50s cooldown).</li>
-        </ul>
+<ul>
+  <li>
+    <strong style="color:#e67e22;">Swordsman</strong> 🗡️ (HP: 120, Color: <span style="color:#e67e22;">#e67e22</span>)<br>
+    Basic Attack: A powerful melee slash that deals <strong>25 damage</strong>.<br>
+    Special Ability: Temporarily gains speed<strong2× movement speed</strong> for <strong>3 seconds</strong>, allowing quick attacks or escapes.
+  </li>
+
+  <li>
+    <strong style="color:#2ecc71;">Archer </strong> 🏹 (HP: 100, Color: <span style="color:#2ecc71;">#2ecc71</span>)<br>
+    Basic Attack: Fires arrows dealing <strong>10 damage</strong> per shot.<br>
+    Special Ability: Fires a <strong>fast arrow</strong> that deals <strong>20 damage</strong>. Great for burst damage.
+  </li>
+
+  <li>
+    <strong style="color:#3498db;">Icezzy</strong> ❄️ (HP: 105, Color: <span style="color:#3498db;">#3498db</span>)<br>
+    Basic Attack: Shoots an ice bolt that deals <strong>10 damage</strong>.<br>
+    Special Ability: Casts a <strong>freeze attack</strong> that does <strong>10 damage</strong> and also <strong>slows the enemy's movement for 10 seconds</strong>, making it easier to control fights.
+  </li>
+
+  <li>
+    <strong style="color:#2ecc40;">Poisonerer</strong> ☠️ (HP: 95, Color: <span style="color:#2ecc40;">#2ecc40</span>)<br>
+    Basic Attack: Shoots a Poisoner dart that deals <strong>10 immediate damage</strong>.<br>
+    Special Ability: Fires a stronger dart that deals <strong>10 direct damage</strong> + <strong>10 Poisoner damage over 15 seconds</strong>. Ideal for wearing down enemies over time.
+  </li>
+
+  <li>
+    <strong style="color:#9b59b6;">Healer</strong> ✨ (HP: 100, Color: <span style="color:#9b59b6;">#9b59b6</span>)<br>
+    Basic Attack: Fires a bolt dealing <strong>10 damage</strong>.<br>
+    Special Ability: Heals for <strong>40 HP over 20 seconds</strong>. Has a cooldown of <strong>90 seconds</strong>.
+  </li>
+
+  <li>
+    <strong style="color:#1abc9c;">NightGhost</strong> 🌙 (HP: 80, Color: <span style="color:#1abc9c;">#1abc9c</span>)<br>
+    Basic Attack: Fires bullets that deal <strong>10 damage</strong> each. Starts with <strong>6 bullets</strong> (increased to <strong>8 bullets in Domain mode</strong>).<br>
+    Passive Ability: Can <strong>phase (become intangible)</strong>, but only <strong>at night for 30 seconds</strong>. Useful for sneaky movement or avoiding attacks. Cooldown 50 seconds.
+  </li>
+</ul>
+
       </div>
     </section>
 
     <!-- GAME STAGE -->
     <section id="screen-stage" class="stage-wrap">
       <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="pill" id="hudPlayers"></div>
+        <div class="pill" id="hudP1">P1</div>
         <div class="row" style="gap:6px">
           <button class="btn" id="restartBtn">↻ Restart</button>
           <button class="btn warn" data-nav="vs-select">⟵ Exit to Select</button>
         </div>
+        <div class="pill" id="hudP2">P2</div>
       </div>
-      <canvas id="gameCanvas" width="1500" height="540"></canvas>
+      <canvas id="gameCanvas" width="1000" height="540"></canvas>
     </section>
 
   </div>
@@ -240,8 +305,9 @@
       else { screens[name].classList.add('active'); }
       if(name!=='home') historyStack.push(name);
       updateBackBtn();
-      if(name==='vsSelect'){ renderSelectPanes(); updateSelections(); 
-        document.getElementById('playBtn').style.display = isOnline && playerNum !== 1 ? 'none' : 'block'; 
+      if(name==='vsSelect'){ renderSelectGrid(p1Grid,'p1'); renderSelectGrid(p2Grid,'p2'); updateSelections(); 
+        if(isOnline) document.getElementById('playBtn').style.display = 'none'; 
+        else document.getElementById('playBtn').style.display = 'block'; 
       }
     }
     function updateBackBtn(){ document.getElementById('backBtn').disabled = historyStack.length===0; }
@@ -258,13 +324,12 @@
     /********************
      * Network Setup    *
      ********************/
-    const socket = io(); // Relative URL for flexibility
+    const socket = io('https://clash-heroes-showdown.onrender.com'); // Replace with your Render URL
     let isOnline = false;
     let playerNum = 0;
-    let localPlayer, players = [];
+    let localPlayer, remotePlayer;
     const holdActions = ['left', 'right', 'jump', 'down', 'defence'];
     const triggerActions = ['attack', 'special'];
-    const MAX_PLAYERS = 6;
 
     const createRoomBtn = document.getElementById('createRoomBtn');
     const joinRoomBtn = document.getElementById('joinRoomBtn');
@@ -273,7 +338,7 @@
 
     createRoomBtn.onclick = () => {
       socket.emit('createRoom', (roomId) => {
-        roomIdDisplay.textContent = `Room ID: ${roomId}. Waiting for players (up to 6)...`;
+        roomIdDisplay.textContent = `Room ID: ${roomId}. Waiting for player...`;
         isOnline = true;
         playerNum = 1;
         show('vsSelect');
@@ -283,10 +348,10 @@
     joinRoomBtn.onclick = () => {
       const roomId = roomIdInput.value.trim();
       if (!roomId) return alert('Enter a room ID');
-      socket.emit('joinRoom', roomId, (success, assignedNum) => {
+      socket.emit('joinRoom', roomId, (success) => {
         if (success) {
           isOnline = true;
-          playerNum = assignedNum;
+          playerNum = 2;
           show('vsSelect');
         } else {
           alert('Failed to join room. It may be full or invalid.');
@@ -294,39 +359,23 @@
       });
     };
 
-    socket.on('playerJoined', (data) => {
-      // Update player count or UI if needed
-    });
-
     socket.on('playerChose', (data) => {
-      selected[data.player] = data.charId;
+      selected[`p${data.player}`] = data.charId;
       updateSelections();
     });
 
     socket.on('gameStart', (data) => {
-      selected = data.choices;
-      startOnlineMatch(data.playerNum, data.choices);
+      selected.p1 = data.p1Char;
+      selected.p2 = data.p2Char;
+      startOnlineMatch(data.playerNum);
     });
 
     socket.on('remoteInput', (data) => {
-      const p = players.find(pl => pl.playerId === data.playerId);
-      if (p) {
-        if (data.type === 'hold') {
-          p.actions[data.action] = data.value;
-        } else if (data.type === 'trigger') {
-          if (data.action === 'attack') p.attack(false);
-          if (data.action === 'special') p.useSpecial(players.filter(pl => pl !== p)); // Special may affect all
-        }
-      }
-    });
-
-    socket.on('playerDisconnected', (disconnectedPlayerId) => {
-      alert(`Player ${disconnectedPlayerId} disconnected.`);
-      // Remove player from game
-      players = players.filter(p => p.playerId !== disconnectedPlayerId);
-      if (players.length < 2) {
-        cleanupMatch();
-        show('network');
+      if (data.type === 'hold') {
+        remotePlayer.actions[data.action] = data.value;
+      } else if (data.type === 'trigger') {
+        if (data.action === 'attack') remotePlayer.attack(false);
+        if (data.action === 'special') remotePlayer.useSpecial(localPlayer);
       }
     });
 
@@ -339,76 +388,56 @@
       { id:'Icezzy', name:'Icezzy', color:'#3498db', hp:105, desc:'Ice bolt 10 dmg. Special: freeze 10 dmg + slow.', role:'Icezzy' },
       { id:'Poisoner', name:'Poisonerer', color:'#2ecc40', hp:95, desc:'Dart 10 dmg. Special: 10 direct + 10 over 15s.', role:'Poisoner' },
       { id:'Healer', name:'Healer', color:'#9b59b6', hp:100, desc:'Bolt 10 dmg. Special: heal 40/20s (90s cd).', role:'Healer' },
-      { id:'NightGhost', name:'NightGhost', color:'#1abc9c', hp:80, desc:'Bullets 10 dmg. Ammo 6 (8 in Domain). Passive phasing at night.', role:'NightGhost' },
+      { id:'NightGhost', name:'NightGhost', color:'#1abc9c', hp:80, desc:'Bullets 10 dmg. Ammo 6 (8 in Domain). Passive phasing only at night.', role:'NightGhost' },
     ];
 
     const charListEl = document.getElementById('charList');
     function renderCharList(targetEl){ if(!targetEl) return; targetEl.innerHTML=''; CHARACTERS.forEach(ch=>{ const card=document.createElement('div'); card.className='char-card'; card.innerHTML=`<div class="char-swatch" style="background:${ch.color}"></div><div class="char-name">${ch.name}</div><div class="char-desc">${ch.desc}</div>`; targetEl.appendChild(card); }); }
     renderCharList(charListEl);
 
-    const playerPanesEl = document.getElementById('playerPanes');
+    const p1Grid = document.getElementById('p1CharGrid');
+    const p2Grid = document.getElementById('p2CharGrid');
+    const p1Label = document.getElementById('p1ChoiceLabel');
+    const p2Label = document.getElementById('p2ChoiceLabel');
     const playBtn = document.getElementById('playBtn');
-    let selected = Array(MAX_PLAYERS + 1).fill(null); // Index 1 to 6
-    function renderSelectPanes(){ 
-      playerPanesEl.innerHTML = '';
-      for (let i = 1; i <= MAX_PLAYERS; i++) {
-        const pane = document.createElement('div');
-        pane.className = 'card';
-        pane.id = `p${i}Pane`;
-        pane.innerHTML = `
-          <div class="row" style="justify-content:space-between">
-            <div class="subtitle">Player ${i}</div>
-            <span class="pill" id="p${i}ChoiceLabel">None</span>
-          </div>
-          <div class="grid cols-2" id="p${i}CharGrid"></div>
-        `;
-        playerPanesEl.appendChild(pane);
-        renderSelectGrid(document.getElementById(`p${i}CharGrid`), i);
-      }
-    }
-    function renderSelectGrid(gridEl, playerId){ 
+    let selected = { p1:null, p2:null };
+    function renderSelectGrid(gridEl, side){ 
       gridEl.innerHTML=''; 
       CHARACTERS.forEach(ch=>{ 
         const card=document.createElement('div'); 
         card.className='char-card'; 
         card.dataset.id=ch.id; 
         card.innerHTML=`<div class="char-swatch" style="background:${ch.color}"></div><div class="char-name">${ch.name}</div><div class="char-desc">${ch.desc}</div>`; 
-        const canSelect = !isOnline || playerId === playerNum;
+        const canSelect = !isOnline || (side === 'p1' && playerNum === 1) || (side === 'p2' && playerNum === 2);
         if (canSelect) {
           card.onclick=()=>{ 
-            selected[playerId]=ch.id; 
+            selected[side]=ch.id; 
             updateSelections(); 
-            if (isOnline) socket.emit('choose', {player: playerNum, charId: ch.id}); 
+            if (isOnline) socket.emit('choose', ch.id); 
           }; 
         }
         gridEl.appendChild(card); 
       }); 
     }
     function updateSelections(){ 
-      let allSelected = true;
-      for (let i = 1; i <= MAX_PLAYERS; i++) {
-        const grid = document.getElementById(`p${i}CharGrid`);
-        if (grid) [...grid.children].forEach(el => el.classList.toggle('selected', el.dataset.id === selected[i]));
-        const label = document.getElementById(`p${i}ChoiceLabel`);
-        if (label) {
-          label.textContent = selected[i] ? CHARACTERS.find(c => c.id === selected[i]).name : (isOnline && i !== playerNum ? 'Waiting...' : 'None');
-          if (!selected[i]) allSelected = false;
-        }
-      }
-      if (playBtn) playBtn.disabled = !allSelected;
+      if(p1Grid){[...p1Grid.children].forEach(el=>el.classList.toggle('selected', el.dataset.id===selected.p1));} 
+      if(p2Grid){[...p2Grid.children].forEach(el=>el.classList.toggle('selected', el.dataset.id===selected.p2));} 
+      if(p1Label) p1Label.textContent = selected.p1 ? CHARACTERS.find(c=>c.id===selected.p1).name : (isOnline && playerNum !== 1 ? 'Waiting...' : 'None'); 
+      if(p2Label) p2Label.textContent = selected.p2 ? CHARACTERS.find(c=>c.id===selected.p2).name : (isOnline && playerNum !== 2 ? 'Waiting...' : 'None'); 
+      if(playBtn) playBtn.disabled = !(selected.p1 && selected.p2); 
     }
 
     /********************
      * Key Settings     *
      ********************/
-    const DEFAULT_KEYS = {left:'a',right:'d',jump:'w',down:'x',attack:'s',defence:'f',special:'g'};
+    const DEFAULT_KEYS = { p1:{left:'a',right:'d',jump:'w',down:'x',attack:'s',defence:'f',special:'g'}, p2:{left:'4',right:'6',jump:'8',down:'2',attack:'5',defence:'+',special:'.'} };
     function loadKeys(){ const saved = JSON.parse(localStorage.getItem('Clash_Heroes_Showdown_Play_keys')||'null'); return saved || JSON.parse(JSON.stringify(DEFAULT_KEYS)); }
     function saveKeys(keys){ localStorage.setItem('Clash_Heroes_Showdown_Play_keys', JSON.stringify(keys)); }
 
     const keysForm = document.getElementById('keysForm');
     const resetBtn = document.getElementById('resetKeys');
-    function fillForm(){ if(!keysForm) return; const k=loadKeys(); keysForm.left.value=k.left; keysForm.right.value=k.right; keysForm.jump.value=k.jump; keysForm.down.value=k.down; keysForm.attack.value=k.attack; keysForm.defence.value=k.defence; keysForm.special.value=k.special; }
-    if(keysForm){ fillForm(); keysForm.addEventListener('submit',(e)=>{ e.preventDefault(); const fd=new FormData(keysForm); const cfg={}; cfg.left=(fd.get('left')||'a').toLowerCase(); cfg.right=(fd.get('right')||'d').toLowerCase(); cfg.jump=(fd.get('jump')||'w').toLowerCase(); cfg.down=(fd.get('down')||'x').toLowerCase(); cfg.attack=(fd.get('attack')||'s').toLowerCase(); cfg.defence=(fd.get('defence')||'f').toLowerCase(); cfg.special=(fd.get('special')||'g').toLowerCase(); saveKeys(cfg); alert('Keys saved!'); }); resetBtn && resetBtn.addEventListener('click',()=>{ saveKeys(DEFAULT_KEYS); fillForm(); alert('Reset to defaults.'); }); }
+    function fillForm(){ if(!keysForm) return; const k=loadKeys(); keysForm.p1_left.value=k.p1.left; keysForm.p1_right.value=k.p1.right; keysForm.p1_jump.value=k.p1.jump; keysForm.p1_down.value=k.p1.down; keysForm.p1_attack.value=k.p1.attack; keysForm.p1_defence.value=k.p1.defence; keysForm.p1_special.value=k.p1.special; keysForm.p2_left.value=k.p2.left; keysForm.p2_right.value=k.p2.right; keysForm.p2_jump.value=k.p2.jump; keysForm.p2_down.value=k.p2.down; keysForm.p2_attack.value=k.p2.attack; keysForm.p2_defence.value=k.p2.defence; keysForm.p2_special.value=k.p2.special; }
+    if(keysForm){ fillForm(); keysForm.addEventListener('submit',(e)=>{ e.preventDefault(); const fd=new FormData(keysForm); const cfg=loadKeys(); cfg.p1.left=(fd.get('p1_left')||'a').toLowerCase(); cfg.p1.right=(fd.get('p1_right')||'d').toLowerCase(); cfg.p1.jump=(fd.get('p1_jump')||'w').toLowerCase(); cfg.p1.down=(fd.get('p1_down')||'x').toLowerCase(); cfg.p1.attack=(fd.get('p1_attack')||'s').toLowerCase(); cfg.p1.defence=(fd.get('p1_defence')||'f').toLowerCase(); cfg.p1.special=(fd.get('p1_special')||'g').toLowerCase(); cfg.p2.left=(fd.get('p2_left')||'4').toLowerCase(); cfg.p2.right=(fd.get('p2_right')||'6').toLowerCase(); cfg.p2.jump=(fd.get('p2_jump')||'8').toLowerCase(); cfg.p2.down=(fd.get('p2_down')||'2').toLowerCase(); cfg.p2.attack=(fd.get('p2_attack')||'5').toLowerCase(); cfg.p2.defence=(fd.get('p2_defence')||'+').toLowerCase(); cfg.p2.special=(fd.get('p2_special')||'.').toLowerCase(); saveKeys(cfg); alert('Keys saved!'); }); resetBtn && resetBtn.addEventListener('click',()=>{ saveKeys(DEFAULT_KEYS); fillForm(); alert('Reset to defaults.'); }); }
 
     /********************
      * Game Engine      *
@@ -417,77 +446,234 @@
     const ctx = canvas.getContext('2d');
     const gravity = 0.6;
     const GOLD = 'rgba(255,215,0,0.95)';
-    const platforms = [ {x:150,y:390,w:140,h:12}, {x:710,y:390,w:140,h:12}, {x:340,y:250,w:140,h:12}, {x:560,y:250,w:140,h:12}, {x:1000,y:390,w:140,h:12}, {x:1200,y:250,w:140,h:12} ]; // Added more platforms
+    const platforms = [ {x:150,y:390,w:140,h:12}, {x:710,y:390,w:140,h:12}, {x:340,y:250,w:140,h:12}, {x:560,y:250,w:140,h:12} ];
 
     const slashes = []; const sparks=[];
-    let nightUntil = 0;
-    const isNight = () => Date.now() < nightUntil;
+    // === Night mode (Domain) flag ===
+    let nightUntil = 0; // timestamp (ms) until sky is night
+    const isNight = () => Date.now() < nightUntil; // helper
 
     class Player {
-      constructor(x, base, controls, playerId) {
-        this.playerId = playerId;
-        this.x = x; this.y = 430; this.width = 40; this.height = 50; this.color = base.color;
-        this.velY = 0; this.isJumping = false; this.health = base.hp; this.maxHealth = base.hp;
-        this.controls = controls; this.role = base.role; this.arrows = []; this.direction = 1; this.isDefending = false; this.ignorePlatform = false;
-        this.slowEndTime = 0; this.PoisonerEndTime = 0; this.PoisonerInterval = null; this.speedBoostEnd = 0; this.specialCooldownEnd = 0;
-        this.attackCooldownEnd = 0;
-        this.baseSpeed = 5;
-        this.domainActiveEnd = 0;
-        this.ammo = (this.role === 'Swordsman') ? null : (this.role === 'NightGhost' ? 6 : 7);
+      constructor(x, base, controls) {
+        this.x=x; this.y=430; this.width=40; this.height=50; this.color=base.color;
+        this.velY=0; this.isJumping=false; this.health=base.hp; this.maxHealth=base.hp;
+        this.controls=controls; this.role=base.role; this.arrows=[]; this.direction=1; this.isDefending=false; this.ignorePlatform=false;
+        this.slowEndTime=0; this.PoisonerEndTime=0; this.PoisonerInterval=null; this.speedBoostEnd=0; this.specialCooldownEnd=0;
+        this.attackCooldownEnd=0; // Swordsman delay
+        this.baseSpeed=5;
+        // NightGhost Domain timer
+        this.domainActiveEnd=0;
+        // Ammo for ranged (role-based caps)
+        this.ammo = (this.role==='Swordsman') ? null : (this.role==='NightGhost' ? 6 : 7);
         this.reloadEnd = 0;
-        this.healAuraEnd = 0; this.healInterval = null; this.auraPulse = 0;
-        this.healCooldownEnd = 0;
-        this._frameStartX = this.x; this._frameStartY = this.y; this._stationary = false;
-        this._activeIntervals = [];
+        // Healer HOT
+        this.healAuraEnd=0; this.healInterval=null; this.auraPulse=0; // 20s aura
+        this.healCooldownEnd=0; // 90s cooldown gate
+        // Stationary flag per frame
+        this._frameStartX=this.x; this._frameStartY=this.y; this._stationary=false;
+        // cleanup holders
+        this._activeIntervals=[];
+        // Actions and flags
         this.actions = {left: false, right: false, jump: false, down: false, defence: false};
         this.attackFlag = false;
         this.specialFlag = false;
       }
-      // ... (keep all other methods like facing, currentSpeed, getAmmoCap, isReloading, isStationary, opponentWithin2Heights, draw, moveLeft, moveRight, jump, down, attack, useSpecial, update, applyFreeze, applyPoisonerOverTime, drawArrows, cleanupTimers, remaining the same)
-      // Note: In useSpecial, for NightGhost, opponentWithin2Heights can check against any opponent
-      opponentWithin2Heights(opponents) {
-        return opponents.some(opp => Math.abs((this.x + this.width / 2) - (opp.x + opp.width / 2)) <= (2 * this.height));
-      }
-      useSpecial(opponents) {
-        const now = Date.now();
-        if (this.role === 'NightGhost') {
-          if (now < this.specialCooldownEnd) return;
-          if (!this.opponentWithin2Heights(opponents)) return;
-          // ... rest same
+      facing(){ return this.direction===1 ? '→' : '←'; }
+      currentSpeed(){ let s=(Date.now()<this.speedBoostEnd)? this.baseSpeed*2 : this.baseSpeed; if(Date.now()<this.slowEndTime) s*=0.25; return s; }
+      getAmmoCap(){ if(this.role==='Swordsman') return null; if(this.role==='NightGhost'){ return (Date.now()<this.domainActiveEnd) ? 8 : 6; } return 7; }
+      isReloading(){ return this.role!=='Swordsman' && this.reloadEnd>Date.now(); }
+      isStationary(){ return !!this._stationary; }
+      opponentWithin2Heights(opponent){ const myCenterX=this.x+this.width/2; const oppCenterX=opponent.x+opponent.width/2; return Math.abs(myCenterX-oppCenterX) <= (2*this.height); }
+      draw(){
+        // body
+        ctx.fillStyle=this.color; ctx.fillRect(this.x,this.y,this.width,this.height);
+        // facing indicator
+        ctx.fillStyle='rgba(0,0,0,.45)'; const tY=this.y+this.height/2-4; if(this.direction===1){ ctx.beginPath(); ctx.moveTo(this.x+this.width+2,tY); ctx.lineTo(this.x+this.width+10,tY+4); ctx.lineTo(this.x+this.width+2,tY+8); ctx.closePath(); ctx.fill(); } else { ctx.beginPath(); ctx.moveTo(this.x-2,tY); ctx.lineTo(this.x-10,tY+4); ctx.lineTo(this.x-2,tY+8); ctx.closePath(); ctx.fill(); }
+        // shield edge
+        if(this.isDefending){ ctx.strokeStyle='rgba(110,180,255,.9)'; ctx.lineWidth=3; if(this.direction===1){ ctx.strokeRect(this.x+this.width, this.y, 8, this.height);} else { ctx.strokeRect(this.x-8, this.y, 8, this.height);} }
+        // Healer aura pulsing gold
+        if(this.role==='Healer' && Date.now()<this.healAuraEnd){ this.auraPulse+=0.08; const alpha=0.5+0.5*Math.sin(this.auraPulse*4); ctx.strokeStyle=`rgba(255,215,0,${alpha})`; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(this.x+this.width/2,this.y+this.height/2,35,0,Math.PI*2); ctx.stroke(); }
+        // ammo/reload labels for ranged
+        if(this.role!=='Swordsman'){
+          ctx.fillStyle='#000'; ctx.font='12px Arial'; const y=this.y-6; if(this.isReloading()){ ctx.fillText('Reloading…', this.x-6, y); } else { ctx.fillText('Ammo: '+this.ammo, this.x-6, y); }
         }
-        // ... other roles same
+        // NightGhost domain glow
+        if(this.role==='NightGhost' && Date.now()<this.domainActiveEnd){ ctx.strokeStyle='rgba(26,188,156,0.6)'; ctx.lineWidth=3; ctx.strokeRect(this.x-3,this.y-3,this.width+6,this.height+6); }
       }
+      moveLeft(){ this.x -= this.currentSpeed(); this.direction=-1; if(this.x<0) this.x=0; }
+      moveRight(){ this.x += this.currentSpeed(); this.direction=1; if(this.x+this.width>canvas.width) this.x=canvas.width-this.width; }
+      jump(){ if(!this.isJumping){ this.velY = -16; this.isJumping=true; } }
+      down(){ this.ignorePlatform=true; setTimeout(()=>this.ignorePlatform=false,300); }
+      attack(isSpecial=false){
+        const now=Date.now();
+        if(this.role==='Swordsman'){
+          if(now<this.attackCooldownEnd) return;
+          const windup=220, active=140, recover=200;
+          const range=this.height; const w=range; const h=this.height*0.6; const x=this.direction===1? this.x+this.width : this.x - w; const y=this.y + this.height/2 - h/2;
+          const isSuperMelee = now < this.speedBoostEnd;
+          slashes.push({ owner:this, x, y, w, h, damage:25, activateAt: now+windup, endAt: now+windup+active, super:isSuperMelee });
+          this.attackCooldownEnd = now + windup + active + recover;
+        } else {
+          if(this.reloadEnd && now>=this.reloadEnd){ this.ammo=this.getAmmoCap(); this.reloadEnd=0; }
+          if(this.isReloading()) return;
+          if(this.ammo<=0){ this.reloadEnd = now + 1500; return; }
+          let dmg = 10, speed = 6, flags={};
+          if(isSpecial){
+            if(this.role==='Archer'){ dmg=20; speed=25; flags.super=true; }
+            if(this.role==='Icezzy'){ dmg=10; speed=7; flags.freeze=true; flags.super=true; }
+            if(this.role==='Poisoner'){ dmg=10; flags.PoisonerSpecial=true; flags.super=true; }
+            if(this.role==='Healer'){ /* Healer special is HOT, handled by useSpecial */ }
+            if(this.role==='NightGhost'){ /* domain handled by useSpecial */ }
+          }
+          const projColor = (this.role==='NightGhost') ? '#16a085' : (flags.PoisonerSpecial ? 'darkgreen' : (flags.freeze ? 'deepskyblue' : (this.role==='Healer' ? '#b084f5' : 'brown')));
+          const proj = { x: this.x + (this.direction===1 ? this.width : -14), y: this.y + this.height/2, width:14, height:5, speed: this.direction*speed, damage:dmg, color:projColor, Healer:(this.role==='Healer'), freeze:flags.freeze, PoisonerSpecial:flags.PoisonerSpecial, super:!!flags.super };
+          this.arrows.push(proj);
+          this.ammo -= 1; if(this.ammo<=0){ this.reloadEnd = now + 1500; }
+        }
+      }
+      useSpecial(opponent){
+        const now=Date.now();
+        if(this.role==='Swordsman'){
+          if(now<this.specialCooldownEnd) return; this.speedBoostEnd = now + 3000; this.specialCooldownEnd = now + 8000; return;
+        }
+        if(this.role==='Healer'){
+          if(now<this.healCooldownEnd) return; // 90s cooldown
+          this.healAuraEnd = now + 20000; // 20s
+          this.healCooldownEnd = now + 90000; // 90s cooldown
+          if(this.healInterval) clearInterval(this.healInterval);
+          this.healInterval = setInterval(()=>{
+            if(Date.now()<this.healAuraEnd){ this.health = Math.min(this.maxHealth, this.health + 1); }
+            else { clearInterval(this.healInterval); this.healInterval=null; }
+          }, 500); // 40 HP over 20s => +1 per 500ms
+          this._activeIntervals.push(this.healInterval);
+          return;
+        }
+        if(this.role==='NightGhost'){
+          if(now<this.specialCooldownEnd) return;
+          if(!this.opponentWithin2Heights(opponent)) return; // needs proximity
+          this.domainActiveEnd = now + 30000; // 30s
+          nightUntil = Math.max(nightUntil, this.domainActiveEnd); // stage night
+          this.reloadEnd = 0; // cancel reload
+          this.ammo = this.getAmmoCap(); // instantly set to 8 during domain
+          this.specialCooldownEnd = now + 50000; // 50s cooldown
+          return;
+        }
+        // other ranged specials fire special shot (consumes ammo via attack(true))
+        if(now<this.specialCooldownEnd) return; this.attack(true); this.specialCooldownEnd = now + 1000;
+      }
+      update(){
+        // Gravity & vertical motion
+        this.y += this.velY; this.velY += gravity;
+        // Platform landings
+        for (let p of platforms){ if(!this.ignorePlatform && this.x+this.width>p.x && this.x<p.x+p.w && this.y+this.height<=p.y && this.y+this.height+this.velY>=p.y){ this.y = p.y - this.height; this.velY=0; this.isJumping=false; } }
+        // Floor
+        if(this.y + this.height >= canvas.height){ this.y = canvas.height - this.height; this.velY=0; this.isJumping=false; }
+        // Projectiles move
+        for (let a of this.arrows){ a.x += a.speed; }
+        this.arrows = this.arrows.filter(a=>a.x>-40 && a.x<canvas.width+40);
+        // Poisoner cleanup
+        if(Date.now()>this.PoisonerEndTime && this.PoisonerInterval){ clearInterval(this.PoisonerInterval); this.PoisonerInterval=null; }
+        // NightGhost: clamp ammo back to 6 after domain ends
+        if(this.role==='NightGhost' && Date.now()>this.domainActiveEnd){ if(this.ammo!=null) this.ammo = Math.min(this.ammo, 6); }
+        // Stationary flag for this frame (compare to positions captured at frame start)
+        this._stationary = (Math.abs(this.x - this._frameStartX) < 0.5 && Math.abs(this.y - this._frameStartY) < 0.5);
+      }
+      applyFreeze(){ this.slowEndTime = Date.now()+10000; }
+      // Generic Poisoner over time: totalDamage over durationMs, ticking every 1000ms
+      applyPoisonerOverTime(totalDamage, durationMs){
+        const ticks = Math.max(1, Math.round(durationMs/1000));
+        const perTick = totalDamage / ticks;
+        const end = Date.now()+durationMs;
+        this.PoisonerEndTime = end; // for cleanup tied to this effect
+        if(this.PoisonerInterval) clearInterval(this.PoisonerInterval);
+        this.PoisonerInterval = setInterval(()=>{
+          if(Date.now()<end){ this.health -= perTick; }
+          else { clearInterval(this.PoisonerInterval); this.PoisonerInterval=null; }
+        }, 1000);
+        this._activeIntervals.push(this.PoisonerInterval);
+      }
+      drawArrows(){ for(let a of this.arrows){ ctx.fillStyle = a.color || (a.PoisonerSpecial ? 'darkgreen' : (a.freeze ? 'deepskyblue' : (this.role==='Healer' ? '#b084f5' : 'brown'))); ctx.fillRect(a.x,a.y,a.width,a.height); } }
+      cleanupTimers(){ // clear intervals
+        if(this.healInterval){ clearInterval(this.healInterval); this.healInterval=null; }
+        if(this.PoisonerInterval){ clearInterval(this.PoisonerInterval); this.PoisonerInterval=null; }
+        for(const id of this._activeIntervals){ try{ clearInterval(id); }catch(e){} }
+        this._activeIntervals=[];
+      }
+      // helpers for HUD values
+      remaining(ms){ return Math.max(0, ms-Date.now()); }
     }
 
     function drawPlatforms(){ ctx.fillStyle='rgba(240,240,255,.85)'; platforms.forEach(p=>ctx.fillRect(p.x,p.y,p.w,p.h)); }
 
-    function drawHealthBars(players) {
-      const barWidth = 120; const barHeight = 12; const y = 30; const offsetX = 20;
-      ctx.font = '12px Arial';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#000';
 
-      function getHealthColor(ratio) {
-        if (ratio > 0.6) return '#2ecc71';
-        if (ratio > 0.3) return '#e67e22';
-        return '#e74c3c';
-      }
+    function drawHealthBars(p1, p2) {
+  const barWidth = 220;   
+  const barHeight = 18;   
+  const offsetX = 80;     
+  const y = 30;           
 
-      players.forEach((p, index) => {
-        const text = `P${p.playerId} ${Math.max(0, Math.floor(p.health))} HP`;
-        ctx.fillText(text, offsetX, y + index * 20);
-        const textWidth = ctx.measureText(text).width;
-        let barX = offsetX + textWidth + 8;
-        let barY = y + index * 20 - barHeight / 2;
+  ctx.font = '16px Arial';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#000';
 
-        ctx.fillStyle = '#222';
-        roundRect(ctx, barX, barY, barWidth, barHeight, 4, true, true);
+  // === Helper for color by % ===
+  function getHealthColor(ratio) {
+    if (ratio > 0.6) return '#2ecc71';   // green
+    if (ratio > 0.3) return '#e67e22';   // orange
+    return '#e74c3c';                    // red
+  }
 
-        const ratio = p.health / p.maxHealth;
-        ctx.fillStyle = getHealthColor(ratio);
-        roundRect(ctx, barX, barY, barWidth * ratio, barHeight, 4, true, false);
-      });
-    }
+  // === P1 ===
+  const p1Text = `P1 ${Math.max(0, Math.floor(p1.health))} HP`;
+  ctx.fillText(p1Text, offsetX, y);
+  const p1TextWidth = ctx.measureText(p1Text).width;
+  let p1BarX = offsetX + p1TextWidth + 12;
+  let p1BarY = y - barHeight / 2;
+
+  ctx.fillStyle = '#222';
+  roundRect(ctx, p1BarX, p1BarY, barWidth, barHeight, 6, true, true);
+
+  const p1Ratio = p1.health / p1.maxHealth;
+  ctx.fillStyle = getHealthColor(p1Ratio);
+  roundRect(ctx, p1BarX, p1BarY, barWidth * p1Ratio, barHeight, 6, true, false);
+
+  // === P2 ===
+  const p2Text = `P2 ${Math.max(0, Math.floor(p2.health))} HP`;
+  const p2TextWidth = ctx.measureText(p2Text).width;
+  let p2BarX = canvas.width - offsetX - barWidth;
+  let p2BarY = y - barHeight / 2;
+
+  ctx.fillStyle = '#000';
+  ctx.fillText(p2Text, p2BarX - p2TextWidth - 12, y);
+
+  ctx.fillStyle = '#222';
+  roundRect(ctx, p2BarX, p2BarY, barWidth, barHeight, 6, true, true);
+
+  const p2Ratio = p2.health / p2.maxHealth;
+  ctx.fillStyle = getHealthColor(p2Ratio);
+  roundRect(ctx, p2BarX, p2BarY, barWidth * p2Ratio, barHeight, 6, true, false);
+
+  // Reset
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'alphabetic';
+}
+
+// Helper rounded rect
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
 
     function drawBackground(){
       const night = isNight();
@@ -495,79 +681,88 @@
       if(night){ grd.addColorStop(0,'#0b0f2a'); grd.addColorStop(1,'#1a2044'); }
       else{ grd.addColorStop(0,'#a7d8ff'); grd.addColorStop(1,'#c7f0ff'); }
       ctx.fillStyle=grd; ctx.fillRect(0,0,canvas.width,canvas.height);
-      if(night){ ctx.fillStyle='rgba(255,255,255,0.6)'; for(let i=0;i<60;i++){ const x=(i*97)%canvas.width; const y=(i*53)%200 + 20; ctx.fillRect(x,y,2,2); } }
+      if(night){ ctx.fillStyle='rgba(255,255,255,0.6)'; for(let i=0;i<40;i++){ const x=(i*97)%canvas.width; const y=(i*53)%200 + 20; ctx.fillRect(x,y,2,2); } }
     }
 
     function hitSpark(x,y){ sparks.push({x,y,ttl:250}); }
     function drawSparks(){ for(let i=sparks.length-1;i>=0;i--){ const s=sparks[i]; s.ttl-=16; if(s.ttl<=0){sparks.splice(i,1);continue;} ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.moveTo(s.x-6,s.y); ctx.lineTo(s.x+6,s.y); ctx.moveTo(s.x,s.y-6); ctx.lineTo(s.x,s.y+6); ctx.stroke(); } }
 
-    function checkCollisions(players){
-      // Generalized for multiple players
-      players.forEach(owner => {
-        // Owner's arrows vs others' arrows
-        for (let i = owner.arrows.length - 1; i >= 0; i--) {
-          const a1 = owner.arrows[i];
-          players.forEach(target => {
-            if (target === owner) return;
-            for (let j = target.arrows.length - 1; j >= 0; j--) {
-              const a2 = target.arrows[j];
-              if (a1.x < a2.x + a2.width && a1.x + a1.width > a2.x && a1.y < a2.y + a2.height && a1.y + a1.height > a2.y) {
-                if (a1.super && !a2.super) { target.arrows.splice(j, 1); continue; }
-                if (!a1.super && a2.super) { owner.arrows.splice(i, 1); break; }
-                if (a1.super && a2.super) continue;
-                target.arrows.splice(j, 1);
-                owner.arrows.splice(i, 1);
-                break;
-              }
-            }
-          });
+    function checkCollisions(p1,p2){
+      // Arrow vs Arrow collisions with super logic:
+      for(let i=p1.arrows.length-1;i>=0;i--){
+        const a1 = p1.arrows[i];
+        for(let j=p2.arrows.length-1;j>=0;j--){
+          const a2 = p2.arrows[j];
+          if(a1.x < a2.x + a2.width && a1.x + a1.width > a2.x && a1.y < a2.y + a2.height && a1.y + a1.height > a2.y){
+            if(a1.super && !a2.super){ p2.arrows.splice(j,1); continue; }
+            if(!a1.super && a2.super){ p1.arrows.splice(i,1); break; }
+            if(a1.super && a2.super){ continue; }
+            p2.arrows.splice(j,1);
+            p1.arrows.splice(i,1);
+            break;
+          }
         }
+      }
 
-        // Slashes
-        for (let k = slashes.length - 1; k >= 0; k--) {
-          const s = slashes[k]; const now = Date.now();
-          if (s.owner !== owner) continue;
-          if (now < s.activateAt) { ctx.setLineDash([6, 4]); ctx.strokeStyle = 'rgba(255,215,0,.5)'; ctx.lineWidth = 2; ctx.strokeRect(s.x, s.y, s.w, s.h); ctx.setLineDash([]); continue; }
-          if (now > s.endAt) { slashes.splice(k, 1); continue; }
-          ctx.strokeStyle = GOLD; ctx.lineWidth = 4; ctx.strokeRect(s.x, s.y, s.w, s.h);
-          players.forEach(target => {
-            if (target === owner) return;
-            for (let ai = target.arrows.length - 1; ai >= 0; ai--) {
-              const a = target.arrows[ai];
-              if (a.x < s.x + s.w && a.x + a.width > s.x && a.y < s.y + s.h && a.y + a.height > s.y) {
-                hitSpark(a.x, a.y); target.arrows.splice(ai, 1);
-              }
-            }
-            if (s.x < target.x + target.width && s.x + s.w > target.x && s.y < target.y + target.height && s.y + s.h > target.y) {
-              const dmg = s.super ? s.damage : (target.isDefending ? 10 : s.damage);
-              target.health -= dmg; hitSpark(target.x + target.width / 2, target.y + target.height / 2);
-              slashes.splice(k, 1);
-              break;
-            }
-          });
-        }
+      // Slashes
+      for(let k=slashes.length-1;k>=0;k--){
+        const s=slashes[k]; const now=Date.now();
+        if(now < s.activateAt){ ctx.setLineDash([6,4]); ctx.strokeStyle='rgba(255,215,0,.5)'; ctx.lineWidth=2; ctx.strokeRect(s.x,s.y,s.w,s.h); ctx.setLineDash([]); continue; }
+        if(now > s.endAt){ slashes.splice(k,1); continue; }
+        ctx.strokeStyle=GOLD; ctx.lineWidth=4; ctx.strokeRect(s.x,s.y,s.w,s.h);
+        const opp = (s.owner===p1) ? p2 : p1;
+        for(let ai=opp.arrows.length-1; ai>=0; ai--){ const a = opp.arrows[ai]; const inArea = (a.x < s.x + s.w && a.x + a.width > s.x && a.y < s.y + s.h && a.y + a.height > s.y); if(inArea){ hitSpark(a.x,a.y); opp.arrows.splice(ai,1); } }
+        if(s.x < opp.x + opp.width && s.x + s.w > opp.x && s.y < opp.y + opp.height && s.y + s.h > opp.y){ const dmg = s.super ? s.damage : (opp.isDefending ? 10 : s.damage); opp.health -= dmg; hitSpark(opp.x + opp.width/2, opp.y + opp.height/2); slashes.splice(k,1); }
+      }
 
-        // Projectiles hitting players
-        for (let ai = owner.arrows.length - 1; ai >= 0; ai--) {
-          const a = owner.arrows[ai];
-          players.forEach(target => {
-            if (target === owner) return;
-            if (a.x < target.x + target.width && a.x + a.width > target.x && a.y < target.y + target.height && a.y + a.height > target.y) {
-              if (target.role === 'NightGhost' && target.isStationary() && isNight()) {
-                return;
-              } else {
-                const defendingFront = target.isDefending && ((target.direction === 1 && a.speed < 0) || (target.direction === -1 && a.speed > 0));
-                const dmg = a.super ? a.damage : (defendingFront ? 1 : a.damage);
-                target.health -= dmg;
-                if (a.freeze) target.applyFreeze();
-                if (a.PoisonerSpecial) target.applyPoisonerOverTime(10, 15000);
-                hitSpark(target.x + target.width / 2, target.y + target.height / 2);
-                owner.arrows.splice(ai, 1);
-              }
+      // Projectiles hitting players (p1 -> p2)
+      for(let ai=p1.arrows.length-1; ai>=0; ai--){
+        const a = p1.arrows[ai];
+        if(a.x < p2.x + p2.width && a.x + a.width > p2.x && a.y < p2.y + p2.height && a.y + a.height > p2.y){
+          if(p2.role==='NightGhost' && p2.isStationary() && isNight()){
+            continue;
+          } else {
+            const defendingFront = p2.isDefending && ((p2.direction===1 && a.speed<0)||(p2.direction===-1 && a.speed>0));
+            if(a.super){
+              p2.health -= a.damage;
+              if(a.freeze) p2.applyFreeze();
+              if(a.PoisonerSpecial) p2.applyPoisonerOverTime(10,15000);
+              hitSpark(p2.x+p2.width/2,p2.y+p2.height/2);
+              p1.arrows.splice(ai,1);
+            } else {
+              p2.health -= defendingFront ? 1 : a.damage;
+              if(a.freeze) p2.applyFreeze();
+              if(a.PoisonerSpecial) p2.applyPoisonerOverTime(10,15000);
+              hitSpark(p2.x+p2.width/2,p2.y+p2.height/2);
+              p1.arrows.splice(ai,1);
             }
-          });
+          }
         }
-      });
+      }
+      // Projectiles hitting players (p2 -> p1)
+      for(let ai=p2.arrows.length-1; ai>=0; ai--){
+        const a = p2.arrows[ai];
+        if(a.x < p1.x + p1.width && a.x + a.width > p1.x && a.y < p1.y + p1.height && a.y + a.height > p1.y){
+          if(p1.role==='NightGhost' && p1.isStationary() && isNight()){
+            continue;
+          } else {
+            const defendingFront = p1.isDefending && ((p1.direction===1 && a.speed<0)||(p1.direction===-1 && a.speed>0));
+            if(a.super){
+              p1.health -= a.damage;
+              if(a.freeze) p1.applyFreeze();
+              if(a.PoisonerSpecial) p1.applyPoisonerOverTime(10,15000);
+              hitSpark(p1.x+p1.width/2,p1.y+p1.height/2);
+              p2.arrows.splice(ai,1);
+            } else {
+              p1.health -= defendingFront ? 1 : a.damage;
+              if(a.freeze) p1.applyFreeze();
+              if(a.PoisonerSpecial) p1.applyPoisonerOverTime(10,15000);
+              hitSpark(p1.x+p1.width/2,p1.y+p1.height/2);
+              p2.arrows.splice(ai,1);
+            }
+          }
+        }
+      }
     }
 
     // Input
@@ -580,13 +775,13 @@
           if (action) {
             if (holdActions.includes(action)) {
               localPlayer.actions[action] = true;
-              socket.emit('input', {type: 'hold', action, value: true, playerId: playerNum});
+              socket.emit('input', {type: 'hold', action, value: true});
             } else if (triggerActions.includes(action)) {
               const flag = action + 'Flag';
               if (!localPlayer[flag]) {
                 if (action === 'attack') localPlayer.attack(false);
-                else localPlayer.useSpecial(players.filter(p => p !== localPlayer));
-                socket.emit('input', {type: 'trigger', action, playerId: playerNum});
+                else localPlayer.useSpecial(remotePlayer);
+                socket.emit('input', {type: 'trigger', action});
                 localPlayer[flag] = true;
               }
             }
@@ -602,7 +797,7 @@
           if (action) {
             if (holdActions.includes(action)) {
               localPlayer.actions[action] = false;
-              socket.emit('input', {type: 'hold', action, value: false, playerId: playerNum});
+              socket.emit('input', {type: 'hold', action, value: false});
             } else if (triggerActions.includes(action)) {
               const flag = action + 'Flag';
               localPlayer[flag] = false;
@@ -615,53 +810,53 @@
     }
     initKeyListeners();
 
-    // HUD
-    const hudPlayers = document.getElementById('hudPlayers');
+    // HUD labels
+    const hudP1 = document.getElementById('hudP1');
+    const hudP2 = document.getElementById('hudP2');
 
     // Start match
-    let animId = null;
-    function cleanupMatch(){ cancelAnimationFrame(animId); slashes.length = 0; sparks.length = 0; players.forEach(p => p.cleanupTimers()); players = []; }
-    function startMatch(choices) {
+    let player1, player2, animId=null;
+    function cleanupMatch(){ cancelAnimationFrame(animId); slashes.length=0; sparks.length=0; }
+    function startMatch(p1CharId, p2CharId){
       isOnline = false;
       cleanupMatch();
       const k = loadKeys();
-      const startingPositions = [120, 300, 500, 700, 900, 1100]; // Spread out
-      players = [];
-      for (let i = 1; i <= MAX_PLAYERS; i++) {
-        if (choices[i]) {
-          const c = CHARACTERS.find(c => c.id === choices[i]) || CHARACTERS[0];
-          players.push(new Player(startingPositions[i - 1], c, k, i));
-        }
-      }
-      hudPlayers.textContent = `Players: ${players.length}`;
+      const c1 = CHARACTERS.find(c=>c.id===p1CharId) || CHARACTERS[0];
+      const c2 = CHARACTERS.find(c=>c.id===p2CharId) || CHARACTERS[1];
+      player1 = new Player(120, c1, k.p1);
+      player2 = new Player(canvas.width-160, c2, k.p2);
+      hudP1.textContent = `P1: ${c1.name}`; hudP2.textContent = `P2: ${c2.name}`;
+      // reset global night
       nightUntil = 0;
-      show('stage'); gameLoop();
+      cancelAnimationFrame(animId); show('stage'); gameLoop();
     }
 
-    function startOnlineMatch(pNum, choices) {
+    function startOnlineMatch(pNum) {
       playerNum = pNum;
       isOnline = true;
       cleanupMatch();
       const k = loadKeys();
       const dummyControls = {left:'', right:'', jump:'', down:'', attack:'', defence:'', special:''};
-      const startingPositions = [120, 300, 500, 700, 900, 1100];
-      players = [];
-      for (let i = 1; i <= MAX_PLAYERS; i++) {
-        if (choices[i]) {
-          const c = CHARACTERS.find(c => c.id === choices[i]);
-          const controls = (i === playerNum) ? k : dummyControls;
-          const p = new Player(startingPositions[i - 1], c, controls, i);
-          players.push(p);
-          if (i === playerNum) localPlayer = p;
-        }
+      const c1 = CHARACTERS.find(c => c.id === selected.p1);
+      const c2 = CHARACTERS.find(c => c.id === selected.p2);
+      if (playerNum === 1) {
+        player1 = new Player(120, c1, k.p1);
+        player2 = new Player(canvas.width - 160, c2, dummyControls);
+        localPlayer = player1;
+        remotePlayer = player2;
+      } else {
+        player1 = new Player(120, c1, dummyControls);
+        player2 = new Player(canvas.width - 160, c2, k.p1); // Use p1 keys for local player
+        localPlayer = player2;
+        remotePlayer = player1;
       }
-      hudPlayers.textContent = `Players: ${players.length}`;
+      hudP1.textContent = `P1: ${c1.name}`; hudP2.textContent = `P2: ${c2.name}`;
       nightUntil = 0;
       show('stage');
       gameLoop();
     }
 
-    function handlePlayerControls(p, opponents) {
+    function handlePlayerControls(p, opponent) {
       p.isDefending = p.actions.defence;
       if (p.actions.left) p.moveLeft();
       if (p.actions.right) p.moveRight();
@@ -670,64 +865,125 @@
     }
 
     function drawPowerHUD(p){
-      // ... same as before, but for each player
+      const now = Date.now();
+      const x = p.x + p.width/2;
+      const y = p.y - 12;
+      ctx.textAlign='center'; ctx.font='12px Arial';
+      // Show active power name + remaining
+      const lines = [];
+      if(p.role==='Healer'){
+        if(now < p.healAuraEnd) lines.push({txt:`Healing ${Math.ceil((p.healAuraEnd-now)/1000)}s`, color:'gold'});
+        if(now < p.healCooldownEnd) lines.push({txt:`CD ${Math.ceil((p.healCooldownEnd-now)/1000)}s`, color:'rgba(255,255,255,.9)'});
+      }
+      if(p.role==='NightGhost'){
+        if(now < p.domainActiveEnd) lines.push({txt:`Domain ${Math.ceil((p.domainActiveEnd-now)/1000)}s`, color:'#16a085'});
+        if(now < p.specialCooldownEnd) lines.push({txt:`CD ${Math.ceil((p.specialCooldownEnd-now)/1000)}s`, color:'rgba(255,255,255,.9)'});
+      }
+      if(p.role==='Swordsman'){
+        if(now < p.speedBoostEnd) lines.push({txt:`Speed ${Math.ceil((p.speedBoostEnd-now)/1000)}s`, color:'orange'});
+        if(now < p.specialCooldownEnd) lines.push({txt:`CD ${Math.ceil((p.specialCooldownEnd-now)/1000)}s`, color:'rgba(255,255,255,.9)'});
+      }
+      // Generic: if Poisonered show remaining
+      if(p.PoisonerEndTime && now < p.PoisonerEndTime) lines.push({txt:`Poisoner ${Math.ceil((p.PoisonerEndTime-now)/1000)}s`, color:'darkgreen'});
+      // draw lines above head
+      for(let i=0;i<lines.length;i++){
+        const LY = y - i*16;
+        // background pill
+        const txt = lines[i].txt;
+        const width = ctx.measureText(txt).width + 12;
+        ctx.fillStyle='rgba(0,0,0,0.6)'; roundRect(ctx, x - width/2, LY-12, width, 16, 8, true, false);
+        ctx.fillStyle=lines[i].color; ctx.fillText(txt, x, LY+2);
+      }
     }
 
-    function gameLoop(timestamp) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); drawBackground(); drawPlatforms();
-      players.forEach(p => {
-        p._frameStartX = p.x; p._frameStartY = p.y;
-      });
+    function roundRect(ctx, x, y, w, h, r, fill, stroke){ if (typeof stroke == 'undefined') { stroke = true; } if (typeof r === 'undefined') { r = 5; } ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); if(fill) ctx.fill(); if(stroke) ctx.stroke(); }
 
+    function gameLoop(){
+      ctx.clearRect(0,0,canvas.width,canvas.height); drawBackground(); drawPlatforms();
+      // capture frame-start positions for stationary check
+      player1._frameStartX = player1.x; player1._frameStartY = player1.y;
+      player2._frameStartX = player2.x; player2._frameStartY = player2.y;
+      // Set actions for local mode
       if (!isOnline) {
-        // Local mode inputs (for testing, but online is focus)
-        players.forEach(p => {
-          p.actions.left = keysDown[p.controls.left];
-          p.actions.right = keysDown[p.controls.right];
-          p.actions.jump = keysDown[p.controls.jump];
-          p.actions.down = keysDown[p.controls.down];
-          p.actions.defence = keysDown[p.controls.defence];
-          if (keysDown[p.controls.attack]) {
-            if (!keysDown[`_atk_p${p.playerId}`]) {
-              p.attack(false);
-              keysDown[`_atk_p${p.playerId}`] = true;
-            }
-          } else keysDown[`_atk_p${p.playerId}`] = false;
-          if (keysDown[p.controls.special]) {
-            if (!keysDown[`_sp_p${p.playerId}`]) {
-              p.useSpecial(players.filter(pl => pl !== p));
-              keysDown[`_sp_p${p.playerId}`] = true;
-            }
-          } else keysDown[`_sp_p${p.playerId}`] = false;
-        });
+        player1.actions.left = keysDown[player1.controls.left];
+        player1.actions.right = keysDown[player1.controls.right];
+        player1.actions.jump = keysDown[player1.controls.jump];
+        player1.actions.down = keysDown[player1.controls.down];
+        player1.actions.defence = keysDown[player1.controls.defence];
+
+        player2.actions.left = keysDown[player2.controls.left];
+        player2.actions.right = keysDown[player2.controls.right];
+        player2.actions.jump = keysDown[player2.controls.jump];
+        player2.actions.down = keysDown[player2.controls.down];
+        player2.actions.defence = keysDown[player2.controls.defence];
+
+        // Triggers for local
+        const kc1 = player1.controls;
+        if (keysDown[kc1.attack]) {
+          if (!keysDown['_atk_p1']) {
+            player1.attack(false);
+            keysDown['_atk_p1'] = true;
+          }
+        } else keysDown['_atk_p1'] = false;
+        if (keysDown[kc1.special]) {
+          if (!keysDown['_sp_p1']) {
+            player1.useSpecial(player2);
+            keysDown['_sp_p1'] = true;
+          }
+        } else keysDown['_sp_p1'] = false;
+
+        const kc2 = player2.controls;
+        if (keysDown[kc2.attack]) {
+          if (!keysDown['_atk_p2']) {
+            player2.attack(false);
+            keysDown['_atk_p2'] = true;
+          }
+        } else keysDown['_atk_p2'] = false;
+        if (keysDown[kc2.special]) {
+          if (!keysDown['_sp_p2']) {
+            player2.useSpecial(player1);
+            keysDown['_sp_p2'] = true;
+          }
+        } else keysDown['_sp_p2'] = false;
       }
-
-      players.forEach(p => {
-        handlePlayerControls(p, players.filter(pl => pl !== p));
-        p.update();
-      });
-
-      checkCollisions(players);
-
-      players.forEach(p => {
-        p.draw(); p.drawArrows(); drawPowerHUD(p);
-      });
-
-      drawHealthBars(players); drawSparks();
-
-      // Win state: last one standing
-      const alivePlayers = players.filter(p => p.health > 0);
-      if (alivePlayers.length <= 1) {
+      // Controls (hold actions)
+      handlePlayerControls(player1, player2);
+      handlePlayerControls(player2, player1);
+      // Updates
+      player1.update(); player2.update();
+      // Collisions
+      checkCollisions(player1,player2);
+      // Draw
+      player1.draw(); player1.drawArrows();
+      player2.draw(); player2.drawArrows();
+      drawHealthBars(player1,player2); drawSparks();
+      // Power HUDs
+      drawPowerHUD(player1); drawPowerHUD(player2);
+      // Win state
+      if (player1.health <= 0 || player2.health <= 0) {
+        // Semi-transparent dark background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const winner = alivePlayers[0] ? `PLAYER ${alivePlayers[0].playerId} WINS!` : 'DRAW!';
+
+        // Winner box
+        const boxWidth = 400;
+        const boxHeight = 140;
+        const boxX = (canvas.width - boxWidth) / 2;
+        const boxY = (canvas.height - boxHeight) / 2;
+
+        ctx.fillStyle = '#222';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 20, true, true);
+
+        // Winner text
+        const winner = player1.health <= 0 ? 'PLAYER 2 WINS!' : 'PLAYER 1 WINS!';
         ctx.fillStyle = '#f1c40f';
         ctx.font = 'bold 32px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(winner, canvas.width / 2, canvas.height / 2);
-        ctx.fillStyle = '#fff';
-        ctx.fillText('Press R to Restart or M for Menu', canvas.width / 2, canvas.height / 2 + 40);
+
         return;
       }
       animId = requestAnimationFrame(gameLoop);
@@ -736,32 +992,13 @@
     // Buttons
     const playBtnEl = document.getElementById('playBtn');
     const restartBtn = document.getElementById('restartBtn');
-    if (playBtnEl) playBtnEl.onclick = () => {
-      if (selected.filter(s => s).length < 2) { alert('At least 2 players must select characters.'); return; }
-      if (isOnline) socket.emit('startGame');
-      else startMatch(selected);
-    };
-    if (restartBtn) restartBtn.onclick = () => {
-      if (isOnline) socket.emit('startGame');
-      else startMatch(selected);
-    };
-
-    // Handle keydown for restart/menu in game over
-    window.addEventListener('keydown', (e) => {
-      if (players.filter(p => p.health > 0).length <= 1) {
-        if (e.key.toLowerCase() === 'r') {
-          if (isOnline) socket.emit('startGame');
-          else startMatch(selected);
-        }
-        if (e.key.toLowerCase() === 'm') {
-          cleanupMatch();
-          show('vsSelect');
-        }
-      }
-    });
+    if(playBtnEl) playBtnEl.onclick = ()=>{ if(!selected.p1 || !selected.p2){ alert('Pick a character for both players.'); return; } startMatch(selected.p1, selected.p2); };
+    if(restartBtn) restartBtn.onclick = ()=>{ startMatch(selected.p1, selected.p2); };
 
     // Initial route
     show('home');
   </script>
 </body>
 </html>
+
+
