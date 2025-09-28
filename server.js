@@ -9,20 +9,22 @@ const server = http.createServer(app);
 // Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: '*', // allow all origins; restrict in production
+    origin: '*', // allow all origins; in production, set your frontend URL
     methods: ['GET', 'POST']
   }
 });
 
-// Serve static files
+// Serve static frontend files (index.html and assets)
 app.use(express.static(path.join(__dirname, '.')));
 
-// Catch-all route (SPA)
-app.get('*', (req, res) => {
+// SPA fallback route middleware (must be AFTER static files)
+app.use((req, res) => {
   res.sendFile(path.resolve(__dirname, 'index.html'));
 });
 
-// Game rooms
+// ------------------------
+// Socket.io Game Logic
+// ------------------------
 let rooms = {};
 
 io.on('connection', (socket) => {
@@ -81,6 +83,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Use Render PORT
+// ------------------------
+// Start Server (Render compatible)
+// ------------------------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
