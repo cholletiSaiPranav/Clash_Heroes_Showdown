@@ -5,21 +5,29 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
+
+// Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: 'https://clash-heroes-showdown.onrender.com', // Allow all origins for simplicity; restrict in production
+    origin: '*', // allow all origins for testing; restrict in production
+    methods: ['GET', 'POST']
   }
 });
 
+// Serve static files (your frontend build)
 app.use(express.static(path.join(__dirname, '.')));
 
-app.get('*', (req, res) => {
+// Catch-all route to serve index.html for SPA routing
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Game rooms storage
 let rooms = {};
 
 io.on('connection', (socket) => {
+  console.log('New socket connected:', socket.id);
+
   socket.on('createRoom', (callback) => {
     const roomId = Math.random().toString(36).substring(7);
     rooms[roomId] = { host: socket.id, players: 1, choices: { p1: null, p2: null } };
@@ -40,10 +48,13 @@ io.on('connection', (socket) => {
   socket.on('choose', (charId) => {
     const roomId = Array.from(socket.rooms).find(r => r !== socket.id);
     if (!roomId || !rooms[roomId]) return;
+
     const isHost = socket.id === rooms[roomId].host;
     if (isHost) rooms[roomId].choices.p1 = charId;
     else rooms[roomId].choices.p2 = charId;
+
     io.to(roomId).emit('playerChose', { player: isHost ? 1 : 2, charId });
+
     if (rooms[roomId].choices.p1 && rooms[roomId].choices.p2) {
       io.in(roomId).fetchSockets().then((sockets) => {
         sockets.forEach((s) => {
@@ -64,7 +75,12 @@ io.on('connection', (socket) => {
       socket.to(roomId).emit('remoteInput', data);
     }
   });
+
+  socket.on('disconnect', () => {
+    console.log('Socket disconnected:', socket.id);
+  });
 });
 
-const port = process.env.PORT || 3000;
-server.listen(port, () => console.log(`Server running on port ${port}`));
+// Use Render's PORT environment variable
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
