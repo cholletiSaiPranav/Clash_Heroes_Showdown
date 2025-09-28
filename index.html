@@ -99,12 +99,29 @@
             <button class="btn" data-nav="characters">👤 Character List</button>
             <button class="btn" data-nav="keys">⌨ Key Settings</button>
             <button class="btn" data-nav="guide">📘 Guide</button>
-            <button class="btn" disabled>🌐 Network Game (todo)</button>
+            <button class="btn" data-nav="network">🌐 Network Game</button>
           </div>
         </div>
         <div class="card">
           <div class="title">Tip</div>
           <p>Use <span class="pill">Back</span> or <span class="pill">Home</span> anytime.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- NETWORK -->
+    <section id="screen-network" class="menu">
+      <div class="title">Network Game</div>
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="title">Create Room</div>
+          <button class="btn primary" id="createRoomBtn">Create</button>
+          <p id="roomIdDisplay"></p>
+        </div>
+        <div class="card">
+          <div class="title">Join Room</div>
+          <input id="roomIdInput" placeholder="Enter Room ID">
+          <button class="btn primary" id="joinRoomBtn">Join</button>
         </div>
       </div>
     </section>
@@ -259,6 +276,7 @@
 
   </div>
 
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
     /********************
      * Router + State   *
@@ -272,6 +290,7 @@
       keys: document.getElementById('screen-keys'),
       guide: document.getElementById('screen-guide'),
       stage: document.getElementById('screen-stage'),
+      network: document.getElementById('screen-network'),
     };
     const historyStack = [];
     function show(name){
@@ -280,7 +299,10 @@
       else { screens[name].classList.add('active'); }
       if(name!=='home') historyStack.push(name);
       updateBackBtn();
-      if(name==='vsSelect'){ renderSelectGrid(p1Grid,'p1'); renderSelectGrid(p2Grid,'p2'); updateSelections(); }
+      if(name==='vsSelect'){ renderSelectGrid(p1Grid,'p1'); renderSelectGrid(p2Grid,'p2'); updateSelections(); 
+        if(isOnline) document.getElementById('playBtn').style.display = 'none'; 
+        else document.getElementById('playBtn').style.display = 'block'; 
+      }
     }
     function updateBackBtn(){ document.getElementById('backBtn').disabled = historyStack.length===0; }
     document.getElementById('homeBtn').onclick = ()=>{ historyStack.length=0; show('home'); };
@@ -288,9 +310,67 @@
     document.querySelectorAll('[data-nav]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const target = btn.getAttribute('data-nav');
-        const map={main:'main',keys:'keys',characters:'characters',guide:'guide',modes:'modes','vs-select':'vsSelect'};
+        const map={main:'main',keys:'keys',characters:'characters',guide:'guide',modes:'modes','vs-select':'vsSelect', network:'network'};
         show(map[target]||'home');
       });
+    });
+
+    /********************
+     * Network Setup    *
+     ********************/
+    const socket = io('https://your-backend.onrender.com'); // Replace with your Render URL
+    let isOnline = false;
+    let playerNum = 0;
+    let localPlayer, remotePlayer;
+    const holdActions = ['left', 'right', 'jump', 'down', 'defence'];
+    const triggerActions = ['attack', 'special'];
+
+    const createRoomBtn = document.getElementById('createRoomBtn');
+    const joinRoomBtn = document.getElementById('joinRoomBtn');
+    const roomIdDisplay = document.getElementById('roomIdDisplay');
+    const roomIdInput = document.getElementById('roomIdInput');
+
+    createRoomBtn.onclick = () => {
+      socket.emit('createRoom', (roomId) => {
+        roomIdDisplay.textContent = `Room ID: ${roomId}. Waiting for player...`;
+        isOnline = true;
+        playerNum = 1;
+        show('vsSelect');
+      });
+    };
+
+    joinRoomBtn.onclick = () => {
+      const roomId = roomIdInput.value.trim();
+      if (!roomId) return alert('Enter a room ID');
+      socket.emit('joinRoom', roomId, (success) => {
+        if (success) {
+          isOnline = true;
+          playerNum = 2;
+          show('vsSelect');
+        } else {
+          alert('Failed to join room. It may be full or invalid.');
+        }
+      });
+    };
+
+    socket.on('playerChose', (data) => {
+      selected[`p${data.player}`] = data.charId;
+      updateSelections();
+    });
+
+    socket.on('gameStart', (data) => {
+      selected.p1 = data.p1Char;
+      selected.p2 = data.p2Char;
+      startOnlineMatch(data.playerNum);
+    });
+
+    socket.on('remoteInput', (data) => {
+      if (data.type === 'hold') {
+        remotePlayer.actions[data.action] = data.value;
+      } else if (data.type === 'trigger') {
+        if (data.action === 'attack') remotePlayer.attack(false);
+        if (data.action === 'special') remotePlayer.useSpecial(localPlayer);
+      }
     });
 
     /********************
@@ -315,8 +395,31 @@
     const p2Label = document.getElementById('p2ChoiceLabel');
     const playBtn = document.getElementById('playBtn');
     let selected = { p1:null, p2:null };
-    function renderSelectGrid(gridEl, side){ gridEl.innerHTML=''; CHARACTERS.forEach(ch=>{ const card=document.createElement('div'); card.className='char-card'; card.dataset.id=ch.id; card.innerHTML=`<div class="char-swatch" style="background:${ch.color}"></div><div class="char-name">${ch.name}</div><div class="char-desc">${ch.desc}</div>`; card.onclick=()=>{ selected[side]=ch.id; updateSelections(); }; gridEl.appendChild(card); }); }
-    function updateSelections(){ if(p1Grid){[...p1Grid.children].forEach(el=>el.classList.toggle('selected', el.dataset.id===selected.p1));} if(p2Grid){[...p2Grid.children].forEach(el=>el.classList.toggle('selected', el.dataset.id===selected.p2));} if(p1Label) p1Label.textContent = selected.p1 ? CHARACTERS.find(c=>c.id===selected.p1).name : 'None'; if(p2Label) p2Label.textContent = selected.p2 ? CHARACTERS.find(c=>c.id===selected.p2).name : 'None'; if(playBtn) playBtn.disabled = !(selected.p1 && selected.p2); }
+    function renderSelectGrid(gridEl, side){ 
+      gridEl.innerHTML=''; 
+      CHARACTERS.forEach(ch=>{ 
+        const card=document.createElement('div'); 
+        card.className='char-card'; 
+        card.dataset.id=ch.id; 
+        card.innerHTML=`<div class="char-swatch" style="background:${ch.color}"></div><div class="char-name">${ch.name}</div><div class="char-desc">${ch.desc}</div>`; 
+        const canSelect = !isOnline || (side === 'p1' && playerNum === 1) || (side === 'p2' && playerNum === 2);
+        if (canSelect) {
+          card.onclick=()=>{ 
+            selected[side]=ch.id; 
+            updateSelections(); 
+            if (isOnline) socket.emit('choose', ch.id); 
+          }; 
+        }
+        gridEl.appendChild(card); 
+      }); 
+    }
+    function updateSelections(){ 
+      if(p1Grid){[...p1Grid.children].forEach(el=>el.classList.toggle('selected', el.dataset.id===selected.p1));} 
+      if(p2Grid){[...p2Grid.children].forEach(el=>el.classList.toggle('selected', el.dataset.id===selected.p2));} 
+      if(p1Label) p1Label.textContent = selected.p1 ? CHARACTERS.find(c=>c.id===selected.p1).name : (isOnline && playerNum !== 1 ? 'Waiting...' : 'None'); 
+      if(p2Label) p2Label.textContent = selected.p2 ? CHARACTERS.find(c=>c.id===selected.p2).name : (isOnline && playerNum !== 2 ? 'Waiting...' : 'None'); 
+      if(playBtn) playBtn.disabled = !(selected.p1 && selected.p2); 
+    }
 
     /********************
      * Key Settings     *
@@ -364,6 +467,10 @@
         this._frameStartX=this.x; this._frameStartY=this.y; this._stationary=false;
         // cleanup holders
         this._activeIntervals=[];
+        // Actions and flags
+        this.actions = {left: false, right: false, jump: false, down: false, defence: false};
+        this.attackFlag = false;
+        this.specialFlag = false;
       }
       facing(){ return this.direction===1 ? '→' : '←'; }
       currentSpeed(){ let s=(Date.now()<this.speedBoostEnd)? this.baseSpeed*2 : this.baseSpeed; if(Date.now()<this.slowEndTime) s*=0.25; return s; }
@@ -654,8 +761,48 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
 
     // Input
     const keysDown = {};
-    window.addEventListener('keydown', e=>{ keysDown[e.key.toLowerCase()] = true; });
-    window.addEventListener('keyup',   e=>{ keysDown[e.key.toLowerCase()] = false; });
+    function initKeyListeners() {
+      window.addEventListener('keydown', e => {
+        const key = e.key.toLowerCase();
+        if (isOnline) {
+          const action = Object.keys(localPlayer.controls).find(a => localPlayer.controls[a] === key);
+          if (action) {
+            if (holdActions.includes(action)) {
+              localPlayer.actions[action] = true;
+              socket.emit('input', {type: 'hold', action, value: true});
+            } else if (triggerActions.includes(action)) {
+              const flag = action + 'Flag';
+              if (!localPlayer[flag]) {
+                if (action === 'attack') localPlayer.attack(false);
+                else localPlayer.useSpecial(remotePlayer);
+                socket.emit('input', {type: 'trigger', action});
+                localPlayer[flag] = true;
+              }
+            }
+          }
+        } else {
+          keysDown[key] = true;
+        }
+      });
+      window.addEventListener('keyup', e => {
+        const key = e.key.toLowerCase();
+        if (isOnline) {
+          const action = Object.keys(localPlayer.controls).find(a => localPlayer.controls[a] === key);
+          if (action) {
+            if (holdActions.includes(action)) {
+              localPlayer.actions[action] = false;
+              socket.emit('input', {type: 'hold', action, value: false});
+            } else if (triggerActions.includes(action)) {
+              const flag = action + 'Flag';
+              localPlayer[flag] = false;
+            }
+          }
+        } else {
+          keysDown[key] = false;
+        }
+      });
+    }
+    initKeyListeners();
 
     // HUD labels
     const hudP1 = document.getElementById('hudP1');
@@ -665,26 +812,50 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
     let player1, player2, animId=null;
     function cleanupMatch(){ cancelAnimationFrame(animId); slashes.length=0; sparks.length=0; }
     function startMatch(p1CharId, p2CharId){
+      isOnline = false;
       cleanupMatch();
       const k = loadKeys();
       const c1 = CHARACTERS.find(c=>c.id===p1CharId) || CHARACTERS[0];
       const c2 = CHARACTERS.find(c=>c.id===p2CharId) || CHARACTERS[1];
-      player1 = new Player(120, c1, {left:k.p1.left,right:k.p1.right,jump:k.p1.jump,down:k.p1.down,attack:k.p1.attack,defence:k.p1.defence,special:k.p1.special});
-      player2 = new Player(canvas.width-160, c2, {left:k.p2.left,right:k.p2.right,jump:k.p2.jump,down:k.p2.down,attack:k.p2.attack,defence:k.p2.defence,special:k.p2.special});
+      player1 = new Player(120, c1, k.p1);
+      player2 = new Player(canvas.width-160, c2, k.p2);
       hudP1.textContent = `P1: ${c1.name}`; hudP2.textContent = `P2: ${c2.name}`;
       // reset global night
       nightUntil = 0;
       cancelAnimationFrame(animId); show('stage'); gameLoop();
     }
 
-    function handlePlayerControls(p, who, opponent){
-      const kc = p.controls; p.isDefending = !!keysDown[kc.defence];
-      if(keysDown[kc.left]) p.moveLeft();
-      if(keysDown[kc.right]) p.moveRight();
-      if(keysDown[kc.jump]) p.jump();
-      if(keysDown[kc.down]) p.down();
-      if(keysDown[kc.attack]){ const flag=`_atk_${who}`; if(!keysDown[flag]){ p.attack(false); keysDown[flag]=true; } } else { keysDown[`_atk_${who}`]=false; }
-      if(keysDown[kc.special]){ const flag=`_sp_${who}`; if(!keysDown[flag]){ p.useSpecial(opponent); keysDown[flag]=true; } } else { keysDown[`_sp_${who}`]=false; }
+    function startOnlineMatch(pNum) {
+      playerNum = pNum;
+      isOnline = true;
+      cleanupMatch();
+      const k = loadKeys();
+      const dummyControls = {left:'', right:'', jump:'', down:'', attack:'', defence:'', special:''};
+      const c1 = CHARACTERS.find(c => c.id === selected.p1);
+      const c2 = CHARACTERS.find(c => c.id === selected.p2);
+      if (playerNum === 1) {
+        player1 = new Player(120, c1, k.p1);
+        player2 = new Player(canvas.width - 160, c2, dummyControls);
+        localPlayer = player1;
+        remotePlayer = player2;
+      } else {
+        player1 = new Player(120, c1, dummyControls);
+        player2 = new Player(canvas.width - 160, c2, k.p1); // Use p1 keys for local player
+        localPlayer = player2;
+        remotePlayer = player1;
+      }
+      hudP1.textContent = `P1: ${c1.name}`; hudP2.textContent = `P2: ${c2.name}`;
+      nightUntil = 0;
+      show('stage');
+      gameLoop();
+    }
+
+    function handlePlayerControls(p, opponent) {
+      p.isDefending = p.actions.defence;
+      if (p.actions.left) p.moveLeft();
+      if (p.actions.right) p.moveRight();
+      if (p.actions.jump) p.jump();
+      if (p.actions.down) p.down();
     }
 
     function drawPowerHUD(p){
@@ -726,8 +897,52 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
       // capture frame-start positions for stationary check
       player1._frameStartX = player1.x; player1._frameStartY = player1.y;
       player2._frameStartX = player2.x; player2._frameStartY = player2.y;
-      // Controls
-      handlePlayerControls(player1,'p1',player2); handlePlayerControls(player2,'p2',player1);
+      // Set actions for local mode
+      if (!isOnline) {
+        player1.actions.left = keysDown[player1.controls.left];
+        player1.actions.right = keysDown[player1.controls.right];
+        player1.actions.jump = keysDown[player1.controls.jump];
+        player1.actions.down = keysDown[player1.controls.down];
+        player1.actions.defence = keysDown[player1.controls.defence];
+
+        player2.actions.left = keysDown[player2.controls.left];
+        player2.actions.right = keysDown[player2.controls.right];
+        player2.actions.jump = keysDown[player2.controls.jump];
+        player2.actions.down = keysDown[player2.controls.down];
+        player2.actions.defence = keysDown[player2.controls.defence];
+
+        // Triggers for local
+        const kc1 = player1.controls;
+        if (keysDown[kc1.attack]) {
+          if (!keysDown['_atk_p1']) {
+            player1.attack(false);
+            keysDown['_atk_p1'] = true;
+          }
+        } else keysDown['_atk_p1'] = false;
+        if (keysDown[kc1.special]) {
+          if (!keysDown['_sp_p1']) {
+            player1.useSpecial(player2);
+            keysDown['_sp_p1'] = true;
+          }
+        } else keysDown['_sp_p1'] = false;
+
+        const kc2 = player2.controls;
+        if (keysDown[kc2.attack]) {
+          if (!keysDown['_atk_p2']) {
+            player2.attack(false);
+            keysDown['_atk_p2'] = true;
+          }
+        } else keysDown['_atk_p2'] = false;
+        if (keysDown[kc2.special]) {
+          if (!keysDown['_sp_p2']) {
+            player2.useSpecial(player1);
+            keysDown['_sp_p2'] = true;
+          }
+        } else keysDown['_sp_p2'] = false;
+      }
+      // Controls (hold actions)
+      handlePlayerControls(player1, player2);
+      handlePlayerControls(player2, player1);
       // Updates
       player1.update(); player2.update();
       // Collisions
@@ -739,53 +954,33 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
       // Power HUDs
       drawPowerHUD(player1); drawPowerHUD(player2);
       // Win state
-
       if (player1.health <= 0 || player2.health <= 0) {
-  // Semi-transparent dark background
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Semi-transparent dark background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Winner box
-  const boxWidth = 400;
-  const boxHeight = 140;
-  const boxX = (canvas.width - boxWidth) / 2;
-  const boxY = (canvas.height - boxHeight) / 2;
+        // Winner box
+        const boxWidth = 400;
+        const boxHeight = 140;
+        const boxX = (canvas.width - boxWidth) / 2;
+        const boxY = (canvas.height - boxHeight) / 2;
 
-  ctx.fillStyle = '#222';
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3;
-  roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 20, true, true);
+        ctx.fillStyle = '#222';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 20, true, true);
 
-  // Winner text
-  const winner = player1.health <= 0 ? 'PLAYER 2 WINS!' : 'PLAYER 1 WINS!';
-  ctx.fillStyle = '#f1c40f';
-  ctx.font = 'bold 32px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(winner, canvas.width / 2, canvas.height / 2);
+        // Winner text
+        const winner = player1.health <= 0 ? 'PLAYER 2 WINS!' : 'PLAYER 1 WINS!';
+        ctx.fillStyle = '#f1c40f';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(winner, canvas.width / 2, canvas.height / 2);
 
-  return;
-}
-
-animId = requestAnimationFrame(gameLoop);
-
-// --- helper for rounded boxes ---
-function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  if (fill) ctx.fill();
-  if (stroke) ctx.stroke();
-}
-
+        return;
+      }
+      animId = requestAnimationFrame(gameLoop);
     }
 
     // Buttons
