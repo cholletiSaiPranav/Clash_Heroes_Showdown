@@ -255,6 +255,12 @@
     Basic Attack: Fires bullets that deal <strong>10 damage</strong> each. Starts with <strong>6 bullets</strong> (increased to <strong>8 bullets in Domain mode</strong>).<br>
     Passive Ability: Can <strong>phase (become intangible)</strong>, but only <strong>at night for 30 seconds</strong>. Useful for sneaky movement or avoiding attacks. Cooldown 50 seconds.
   </li>
+
+  <li>
+    <strong style="color:maroon;">Coloren</strong> 🎨 (HP: 100, Color: <span style="color:maroon;">maroon</span>)<br>
+    Basic Attack: Shoots a dart that deals <strong>10 damage</strong>, ammo 8, range limited to 200 units.<br>
+    Special Ability: Swaps colors with the enemy. No cooldown.
+  </li>
 </ul>
 
       </div>
@@ -382,6 +388,7 @@
       { id:'Poisoner', name:'Poisonerer', color:'#2ecc40', hp:95, desc:'Dart 10 dmg. Special: 10 direct + 10 over 15s.', role:'Poisoner' },
       { id:'Healer', name:'Healer', color:'#9b59b6', hp:100, desc:'Bolt 10 dmg. Special: heal 40/20s (90s cd).', role:'Healer' },
       { id:'NightGhost', name:'NightGhost', color:'#1abc9c', hp:80, desc:'Bullets 10 dmg. Ammo 6 (8 in Domain). Passive phasing only at night.', role:'NightGhost' },
+      { id:'Coloren', name:'Coloren', color:'maroon', hp:100, desc:'Dart 10 dmg. Ammo 8, range 200. Darts cancel supers. Special: Swap colors (no CD).', role:'Coloren' },
     ];
 
     const charListEl = document.getElementById('charList');
@@ -457,7 +464,7 @@
         // NightGhost Domain timer
         this.domainActiveEnd=0;
         // Ammo for ranged (role-based caps)
-        this.ammo = (this.role==='Swordsman') ? null : (this.role==='NightGhost' ? 6 : 7);
+        this.ammo = (this.role==='Swordsman') ? null : (this.role==='NightGhost' ? 6 : (this.role==='Coloren' ? 8 : 7));
         this.reloadEnd = 0;
         // Healer HOT
         this.healAuraEnd=0; this.healInterval=null; this.auraPulse=0; // 20s aura
@@ -473,7 +480,7 @@
       }
       facing(){ return this.direction===1 ? '→' : '←'; }
       currentSpeed(){ let s=(Date.now()<this.speedBoostEnd)? this.baseSpeed*2 : this.baseSpeed; if(Date.now()<this.slowEndTime) s*=0.25; return s; }
-      getAmmoCap(){ if(this.role==='Swordsman') return null; if(this.role==='NightGhost'){ return (Date.now()<this.domainActiveEnd) ? 8 : 6; } return 7; }
+      getAmmoCap(){ if(this.role==='Coloren') return 8; if(this.role==='Swordsman') return null; if(this.role==='NightGhost'){ return (Date.now()<this.domainActiveEnd) ? 8 : 6; } return 7; }
       isReloading(){ return this.role!=='Swordsman' && this.reloadEnd>Date.now(); }
       isStationary(){ return !!this._stationary; }
       opponentWithin2Heights(opponent){ const myCenterX=this.x+this.width/2; const oppCenterX=opponent.x+opponent.width/2; return Math.abs(myCenterX-oppCenterX) <= (2*this.height); }
@@ -517,9 +524,11 @@
             if(this.role==='Poisoner'){ dmg=10; flags.PoisonerSpecial=true; flags.super=true; }
             if(this.role==='Healer'){ /* Healer special is HOT, handled by useSpecial */ }
             if(this.role==='NightGhost'){ /* domain handled by useSpecial */ }
+            if(this.role==='Coloren'){ /* Coloren special is swap, no special dart */ dmg=10; speed=6; flags={}; }
           }
-          const projColor = (this.role==='NightGhost') ? '#16a085' : (flags.PoisonerSpecial ? 'darkgreen' : (flags.freeze ? 'deepskyblue' : (this.role==='Healer' ? '#b084f5' : 'brown')));
+          const projColor = (this.role==='NightGhost') ? '#16a085' : (flags.PoisonerSpecial ? 'darkgreen' : (flags.freeze ? 'deepskyblue' : (this.role==='Healer' ? '#b084f5' : (this.role==='Coloren' ? 'maroon' : 'brown'))));
           const proj = { x: this.x + (this.direction===1 ? this.width : -14), y: this.y + this.height/2, width:14, height:5, speed: this.direction*speed, damage:dmg, color:projColor, Healer:(this.role==='Healer'), freeze:flags.freeze, PoisonerSpecial:flags.PoisonerSpecial, super:!!flags.super };
+          if(this.role==='Coloren'){ proj.maxDist=200; proj.startX=proj.x; }
           this.arrows.push(proj);
           this.ammo -= 1; if(this.ammo<=0){ this.reloadEnd = now + 1500; }
         }
@@ -551,6 +560,13 @@
           this.specialCooldownEnd = now + 50000; // 50s cooldown
           return;
         }
+        if(this.role==='Coloren'){
+          const temp = this.color;
+          this.color = opponent.color;
+          opponent.color = temp;
+          // no cooldown
+          return;
+        }
         // other ranged specials fire special shot (consumes ammo via attack(true))
         if(now<this.specialCooldownEnd) return; this.attack(true); this.specialCooldownEnd = now + 1000;
       }
@@ -563,7 +579,7 @@
         if(this.y + this.height >= canvas.height){ this.y = canvas.height - this.height; this.velY=0; this.isJumping=false; }
         // Projectiles move
         for (let a of this.arrows){ a.x += a.speed; }
-        this.arrows = this.arrows.filter(a=>a.x>-40 && a.x<canvas.width+40);
+        this.arrows = this.arrows.filter(a=>a.x>-40 && a.x<canvas.width+40 && (!a.maxDist || Math.abs(a.x - a.startX) <= a.maxDist));
         // Poisoner cleanup
         if(Date.now()>this.PoisonerEndTime && this.PoisonerInterval){ clearInterval(this.PoisonerInterval); this.PoisonerInterval=null; }
         // NightGhost: clamp ammo back to 6 after domain ends
@@ -687,8 +703,26 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
         for(let j=p2.arrows.length-1;j>=0;j--){
           const a2 = p2.arrows[j];
           if(a1.x < a2.x + a2.width && a1.x + a1.width > a2.x && a1.y < a2.y + a2.height && a1.y + a1.height > a2.y){
-            if(a1.super && !a2.super){ p2.arrows.splice(j,1); continue; }
-            if(!a1.super && a2.super){ p1.arrows.splice(i,1); break; }
+            if(a1.super && !a2.super){
+              if(p2.role === 'Coloren'){
+                p1.arrows.splice(i,1);
+                p2.arrows.splice(j,1);
+                break;
+              } else {
+                p2.arrows.splice(j,1);
+                continue;
+              }
+            }
+            if(!a1.super && a2.super){
+              if(p1.role === 'Coloren'){
+                p1.arrows.splice(i,1);
+                p2.arrows.splice(j,1);
+                break;
+              } else {
+                p1.arrows.splice(i,1);
+                break;
+              }
+            }
             if(a1.super && a2.super){ continue; }
             p2.arrows.splice(j,1);
             p1.arrows.splice(i,1);
